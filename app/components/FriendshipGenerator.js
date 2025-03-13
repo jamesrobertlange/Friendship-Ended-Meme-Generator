@@ -1,4 +1,5 @@
 "use client";
+import NextImage from 'next/image'; // Renamed import to avoid conflict
 import { useRef, useState } from 'react';
 
 export default function FriendshipGenerator() {
@@ -45,64 +46,64 @@ export default function FriendshipGenerator() {
     // Load images
     const loadImage = (src) => {
       return new Promise((resolve) => {
-        const img = new Image();
+        const img = new Image(); // Using built-in Image constructor
         img.onload = () => resolve(img);
         img.src = src;
       });
     };
 
-// Create X overlay - make it look more like MS Paint with imperfect lines
-const createXOverlay = (width, height) => {
-  const xCanvas = document.createElement('canvas');
-  xCanvas.width = width;
-  xCanvas.height = height;
-  const xCtx = xCanvas.getContext('2d');
-  
-  // Draw X with green color and uneven MS Paint style
-  xCtx.strokeStyle = 'lime'; // Bright green like in your examples
-  xCtx.lineCap = 'round'; // Round line caps for MS Paint look
-  xCtx.lineWidth = 20; // Thick lines
-  
-  // Add some wobble function to make lines imperfect
-  const wobble = () => (Math.random() - 0.5) * (width * 0.08);
-  
-  // First diagonal - with multiple segments for irregular look
-  xCtx.beginPath();
-  const segments = 4; // Number of segments to create a wobble effect
-  
-  // Start at top left (with small random offset)
-  let lastX = width * 0.05 + wobble();
-  let lastY = height * 0.05 + wobble();
-  xCtx.moveTo(lastX, lastY);
-  
-  // Create multiple segments with slight offsets to make an irregular line
-  for (let i = 1; i <= segments; i++) {
-    const nextX = width * (0.05 + (i * 0.9 / segments)) + wobble();
-    const nextY = height * (0.05 + (i * 0.9 / segments)) + wobble();
-    xCtx.lineTo(nextX, nextY);
-    lastX = nextX;
-    lastY = nextY;
-  }
-  xCtx.stroke();
-  
-  // Second diagonal - also with multiple segments
-  xCtx.beginPath();
-  lastX = width * 0.95 + wobble();
-  lastY = height * 0.05 + wobble();
-  xCtx.moveTo(lastX, lastY);
-  
-  // Create multiple segments with slight offsets
-  for (let i = 1; i <= segments; i++) {
-    const nextX = width * (0.95 - (i * 0.9 / segments)) + wobble();
-    const nextY = height * (0.05 + (i * 0.9 / segments)) + wobble();
-    xCtx.lineTo(nextX, nextY);
-    lastX = nextX;
-    lastY = nextY;
-  }
-  xCtx.stroke();
-  
-  return xCanvas;
-};
+    // Create X overlay - make it look more like MS Paint with imperfect lines
+    const createXOverlay = (width, height) => {
+      const xCanvas = document.createElement('canvas');
+      xCanvas.width = width;
+      xCanvas.height = height;
+      const xCtx = xCanvas.getContext('2d');
+      
+      // Draw X with green color and uneven MS Paint style
+      xCtx.strokeStyle = 'lime'; // Bright green like in your examples
+      xCtx.lineCap = 'round'; // Round line caps for MS Paint look
+      xCtx.lineWidth = 20; // Thick lines
+      
+      // Add some wobble function to make lines imperfect
+      const wobble = () => (Math.random() - 0.5) * (width * 0.08);
+      
+      // First diagonal - with multiple segments for irregular look
+      xCtx.beginPath();
+      const segments = 4; // Number of segments to create a wobble effect
+      
+      // Start at top left (with small random offset)
+      let lastX = width * 0.05 + wobble();
+      let lastY = height * 0.05 + wobble();
+      xCtx.moveTo(lastX, lastY);
+      
+      // Create multiple segments with slight offsets to make an irregular line
+      for (let i = 1; i <= segments; i++) {
+        const nextX = width * (0.05 + (i * 0.9 / segments)) + wobble();
+        const nextY = height * (0.05 + (i * 0.9 / segments)) + wobble();
+        xCtx.lineTo(nextX, nextY);
+        lastX = nextX;
+        lastY = nextY;
+      }
+      xCtx.stroke();
+      
+      // Second diagonal - also with multiple segments
+      xCtx.beginPath();
+      lastX = width * 0.95 + wobble();
+      lastY = height * 0.05 + wobble();
+      xCtx.moveTo(lastX, lastY);
+      
+      // Create multiple segments with slight offsets
+      for (let i = 1; i <= segments; i++) {
+        const nextX = width * (0.95 - (i * 0.9 / segments)) + wobble();
+        const nextY = height * (0.05 + (i * 0.9 / segments)) + wobble();
+        xCtx.lineTo(nextX, nextY);
+        lastX = nextX;
+        lastY = nextY;
+      }
+      xCtx.stroke();
+      
+      return xCanvas;
+    };
 
     try {
       // Load background (new friend) image
@@ -118,14 +119,13 @@ const createXOverlay = (width, height) => {
       gradient.addColorStop(0, '#CF4E09');
       gradient.addColorStop(1, '#00B92C');
       
-      // Increased font size and moved position up slightly
-      // For the top text position, move it even higher
+      // Increased font size and moved position up to prevent cutoff
       ctx.font = 'bold 65px Arial, Helvetica, sans-serif';
       ctx.scale(0.8, 2);
       ctx.fillStyle = gradient;
       ctx.strokeStyle = '#006488';
       ctx.lineWidth = 1;
-      ctx.fillText(topText, 0, 50); // Changed from 30 to 25 to prevent cutoff
+      ctx.fillText(topText, 0, 50); // Moved higher to prevent cutoff
       ctx.strokeText(topText, 0, 50);
       ctx.restore();
       
@@ -246,7 +246,7 @@ const createXOverlay = (width, height) => {
               accept="image/*"
               required
             />
-            <p className="text-sm text-gray-500">You can be in it but you don't have to be</p>
+            <p className="text-sm text-gray-500">You can be in it but you don&apos;t have to be</p>
           </div>
           
           <div className="mb-4">
@@ -287,7 +287,15 @@ const createXOverlay = (width, height) => {
       ) : (
         <div className="mt-6 text-center">
           <h2 className="text-2xl font-bold mb-4">Bless Your New Friendship With <em>{newFriendName.toUpperCase()}</em></h2>
-          <img src={result} alt="Friendship ended" className="mb-4 max-w-full mx-auto" />
+          <div className="mb-4 mx-auto relative" style={{ maxWidth: '100%', height: 'auto' }}>
+            <NextImage 
+              src={result} 
+              alt="Friendship ended" 
+              width={800}
+              height={600}
+              style={{ maxWidth: '100%', height: 'auto' }}
+            />
+          </div>
           <div className="flex justify-center gap-4">
             <button 
               className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
