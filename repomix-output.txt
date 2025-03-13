@@ -1,0 +1,608 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+================================================================
+File Summary
+================================================================
+
+Purpose:
+--------
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+
+File Format:
+------------
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Multiple file entries, each consisting of:
+  a. A separator line (================)
+  b. The file path (File: path/to/file)
+  c. Another separator line
+  d. The full contents of the file
+  e. A blank line
+
+Usage Guidelines:
+-----------------
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+
+Notes:
+------
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+
+Additional Info:
+----------------
+
+================================================================
+Directory Structure
+================================================================
+app/
+  components/
+    FriendshipGenerator.js
+  globals.css
+  layout.js
+  page.js
+public/
+  file.svg
+  globe.svg
+  next.svg
+  vercel.svg
+  window.svg
+.gitignore
+eslint.config.mjs
+jsconfig.json
+next.config.mjs
+package.json
+postcss.config.mjs
+README.md
+
+================================================================
+Files
+================================================================
+
+================
+File: app/components/FriendshipGenerator.js
+================
+"use client";
+import { useRef, useState } from 'react';
+
+export default function FriendshipGenerator() {
+  const [oldFriendName, setOldFriendName] = useState('');
+  const [newFriendName, setNewFriendName] = useState('');
+  const [images, setImages] = useState({
+    newFriend: null,
+    oldFriend1: null,
+    oldFriend2: null,
+  });
+  const [result, setResult] = useState(null);
+  const canvasRef = useRef(null);
+
+  const handleImageChange = (e) => {
+    const { name, files } = e.target;
+    if (files && files[0]) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setImages(prev => ({
+          ...prev,
+          [name]: {
+            src: event.target.result,
+            file: files[0]
+          }
+        }));
+      };
+      reader.readAsDataURL(files[0]);
+    }
+  };
+
+  const generateImage = async () => {
+    if (!images.newFriend || !images.oldFriend1 || !images.oldFriend2) {
+      alert('Please select all required images');
+      return;
+    }
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    
+    // Set canvas dimensions
+    canvas.width = 800;
+    canvas.height = 600;
+    
+    // Load images
+    const loadImage = (src) => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.src = src;
+      });
+    };
+
+    // Create X overlay
+    const createXOverlay = (width, height, strokeWidth = 10) => {
+      const xCanvas = document.createElement('canvas');
+      xCanvas.width = width;
+      xCanvas.height = height;
+      const xCtx = xCanvas.getContext('2d');
+      
+      // Draw X
+      xCtx.strokeStyle = 'red';
+      xCtx.lineWidth = strokeWidth;
+      xCtx.beginPath();
+      xCtx.moveTo(0, 0);
+      xCtx.lineTo(width, height);
+      xCtx.stroke();
+      xCtx.beginPath();
+      xCtx.moveTo(width, 0);
+      xCtx.lineTo(0, height);
+      xCtx.stroke();
+      
+      return xCanvas;
+    };
+
+    try {
+      // Load background (new friend) image
+      const bgImage = await loadImage(images.newFriend.src);
+      ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+      
+      // Draw top text with gradient
+      const topText = `Friendship ended with ${oldFriendName.toUpperCase()}`;
+      ctx.save();
+      
+      // Create gradient
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+      gradient.addColorStop(0, '#CF4E09');
+      gradient.addColorStop(1, '#00B92C');
+      
+      ctx.font = 'bold 58px Arial';
+      ctx.scale(0.8, 2);
+      ctx.fillStyle = gradient;
+      ctx.strokeStyle = '#006488';
+      ctx.lineWidth = 1;
+      ctx.fillText(topText, 0, 40);
+      ctx.strokeText(topText, 0, 40);
+      ctx.restore();
+      
+      // Draw other text elements
+      ctx.font = 'bold 38px Arial';
+      ctx.strokeStyle = '#006488';
+      ctx.lineWidth = 1;
+      
+      // Now
+      ctx.fillStyle = '#DF0676';
+      ctx.fillText('Now', 300, 70);
+      ctx.strokeText('Now', 300, 70);
+      
+      // New friend name
+      ctx.fillStyle = '#AB5955';
+      ctx.fillText(newFriendName.toUpperCase(), 300, 110);
+      ctx.strokeText(newFriendName.toUpperCase(), 300, 110);
+      
+      // is my
+      ctx.fillStyle = '#7C9535';
+      ctx.fillText('is my', 300, 150);
+      ctx.strokeText('is my', 300, 150);
+      
+      // best friend
+      ctx.fillStyle = '#4CBF1F';
+      ctx.fillText('best friend', 300, 185);
+      ctx.strokeText('best friend', 300, 185);
+      
+      // Load and draw old friend images with X overlays
+      const oldFriend1 = await loadImage(images.oldFriend1.src);
+      const oldFriend2 = await loadImage(images.oldFriend2.src);
+      
+      // Draw first old friend
+      ctx.drawImage(oldFriend1, 0, 341, 172, 259);
+      const x1 = createXOverlay(172, 259);
+      ctx.drawImage(x1, 0, 341);
+      
+      // Draw second old friend
+      ctx.drawImage(oldFriend2, 579, 358, 221, 242);
+      const x2 = createXOverlay(221, 242);
+      ctx.drawImage(x2, 579, 358);
+      
+      // Convert canvas to data URL
+      const dataUrl = canvas.toDataURL('image/jpeg');
+      setResult(dataUrl);
+    } catch (error) {
+      console.error('Error generating image:', error);
+      alert('Error generating image. Please try again.');
+    }
+  };
+
+  const downloadImage = () => {
+    if (!result) return;
+    
+    const link = document.createElement('a');
+    link.href = result;
+    link.download = 'friendship-ended.jpg';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const resetForm = () => {
+    setOldFriendName('');
+    setNewFriendName('');
+    setImages({
+      newFriend: null,
+      oldFriend1: null,
+      oldFriend2: null,
+    });
+    setResult(null);
+    
+    // Reset file inputs
+    document.getElementById('new-friend-pic').value = '';
+    document.getElementById('old-friend-1').value = '';
+    document.getElementById('old-friend-2').value = '';
+  };
+
+  return (
+    <div>
+      {!result ? (
+        <form className="mb-6" onSubmit={(e) => { e.preventDefault(); generateImage(); }}>
+          <div className="mb-4">
+            <label htmlFor="old-friend-name" className="block mb-2">BYE</label>
+            <input 
+              type="text" 
+              id="old-friend-name"
+              className="border rounded px-3 py-2 w-full max-w-md"
+              placeholder="Old Friend's Name"
+              value={oldFriendName}
+              onChange={(e) => setOldFriendName(e.target.value)}
+              required
+            />
+          </div>
+          
+          <div className="mb-4">
+            <label htmlFor="new-friend-name" className="block mb-2">HI</label>
+            <input 
+              type="text" 
+              id="new-friend-name"
+              className="border rounded px-3 py-2 w-full max-w-md"
+              placeholder="New Friend's Name"
+              value={newFriendName}
+              onChange={(e) => setNewFriendName(e.target.value)}
+              required
+            />
+          </div>
+          
+          <div className="mb-4">
+            <label htmlFor="new-friend-pic" className="block mb-2">Attach a picture of your new friend</label>
+            <input 
+              type="file" 
+              id="new-friend-pic"
+              name="newFriend"
+              className="border rounded px-3 py-2 w-full max-w-md"
+              onChange={handleImageChange}
+              accept="image/*"
+              required
+            />
+            <p className="text-sm text-gray-500">You can be in it but you don't have to be</p>
+          </div>
+          
+          <div className="mb-4">
+            <label htmlFor="old-friend-1" className="block mb-2">Attach a picture of your old friend</label>
+            <input 
+              type="file" 
+              id="old-friend-1"
+              name="oldFriend1"
+              className="border rounded px-3 py-2 w-full max-w-md"
+              onChange={handleImageChange}
+              accept="image/*"
+              required
+            />
+            <p className="text-sm text-gray-500">Hopefully, an unflattering one.</p>
+          </div>
+          
+          <div className="mb-4">
+            <label htmlFor="old-friend-2" className="block mb-2">Attach another picture of your old friend</label>
+            <input 
+              type="file" 
+              id="old-friend-2"
+              name="oldFriend2"
+              className="border rounded px-3 py-2 w-full max-w-md"
+              onChange={handleImageChange}
+              accept="image/*"
+              required
+            />
+            <p className="text-sm text-gray-500">They are no longer your friend.</p>
+          </div>
+          
+          <button 
+            type="submit" 
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            FRIEND
+          </button>
+        </form>
+      ) : (
+        <div className="mt-6 text-center">
+          <h2 className="text-2xl font-bold mb-4">Bless Your New Friendship With <em>{newFriendName.toUpperCase()}</em></h2>
+          <img src={result} alt="Friendship ended" className="mb-4 max-w-full mx-auto" />
+          <div className="flex justify-center gap-4">
+            <button 
+              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              onClick={downloadImage}
+            >
+              Download Image
+            </button>
+            <button 
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              onClick={resetForm}
+            >
+              Create Another
+            </button>
+          </div>
+        </div>
+      )}
+      
+      {/* Hidden canvas for generating the image */}
+      <canvas ref={canvasRef} style={{ display: 'none' }} />
+    </div>
+  );
+}
+
+================
+File: app/globals.css
+================
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+================
+File: app/layout.js
+================
+import './globals.css'
+
+export const metadata = {
+  title: 'Friendship Ended Generator',
+  description: 'Your friendship has ended and I am so sorry.',
+}
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  )
+}
+
+================
+File: app/page.js
+================
+"use client";
+import FriendshipGenerator from './components/FriendshipGenerator';
+
+export default function Home() {
+  return (
+    <main className="container mx-auto px-4 py-8">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">Friendship Ended Generator</h1>
+        <p className="text-lg">
+          Dedicated to the <a 
+            href="http://internet.gawker.com/facebook-user-asif-ends-friendship-with-mudasir-welc-1731160013" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-blue-500 hover:underline"
+          >
+            new friendship of ASIF and SALMAN
+          </a>.
+        </p>
+      </div>
+      <p className="mb-4 italic">(All fields are required. Just like in <strong>friendship</strong>...)</p>
+      
+      <FriendshipGenerator />
+    </main>
+  );
+}
+
+================
+File: public/file.svg
+================
+<svg fill="none" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 13.5V5.41a1 1 0 0 0-.3-.7L9.8.29A1 1 0 0 0 9.08 0H1.5v13.5A2.5 2.5 0 0 0 4 16h8a2.5 2.5 0 0 0 2.5-2.5m-1.5 0v-7H8v-5H3v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1M9.5 5V2.12L12.38 5zM5.13 5h-.62v1.25h2.12V5zm-.62 3h7.12v1.25H4.5zm.62 3h-.62v1.25h7.12V11z" clip-rule="evenodd" fill="#666" fill-rule="evenodd"/></svg>
+
+================
+File: public/globe.svg
+================
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><g clip-path="url(#a)"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.27 14.1a6.5 6.5 0 0 0 3.67-3.45q-1.24.21-2.7.34-.31 1.83-.97 3.1M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.48-1.52a7 7 0 0 1-.96 0H7.5a4 4 0 0 1-.84-1.32q-.38-.89-.63-2.08a40 40 0 0 0 3.92 0q-.25 1.2-.63 2.08a4 4 0 0 1-.84 1.31zm2.94-4.76q1.66-.15 2.95-.43a7 7 0 0 0 0-2.58q-1.3-.27-2.95-.43a18 18 0 0 1 0 3.44m-1.27-3.54a17 17 0 0 1 0 3.64 39 39 0 0 1-4.3 0 17 17 0 0 1 0-3.64 39 39 0 0 1 4.3 0m1.1-1.17q1.45.13 2.69.34a6.5 6.5 0 0 0-3.67-3.44q.65 1.26.98 3.1M8.48 1.5l.01.02q.41.37.84 1.31.38.89.63 2.08a40 40 0 0 0-3.92 0q.25-1.2.63-2.08a4 4 0 0 1 .85-1.32 7 7 0 0 1 .96 0m-2.75.4a6.5 6.5 0 0 0-3.67 3.44 29 29 0 0 1 2.7-.34q.31-1.83.97-3.1M4.58 6.28q-1.66.16-2.95.43a7 7 0 0 0 0 2.58q1.3.27 2.95.43a18 18 0 0 1 0-3.44m.17 4.71q-1.45-.12-2.69-.34a6.5 6.5 0 0 0 3.67 3.44q-.65-1.27-.98-3.1" fill="#666"/></g><defs><clipPath id="a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg>
+
+================
+File: public/next.svg
+================
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 394 80"><path fill="#000" d="M262 0h68.5v12.7h-27.2v66.6h-13.6V12.7H262V0ZM149 0v12.7H94v20.4h44.3v12.6H94v21h55v12.6H80.5V0h68.7zm34.3 0h-17.8l63.8 79.4h17.9l-32-39.7 32-39.6h-17.9l-23 28.6-23-28.6zm18.3 56.7-9-11-27.1 33.7h17.8l18.3-22.7z"/><path fill="#000" d="M81 79.3 17 0H0v79.3h13.6V17l50.2 62.3H81Zm252.6-.4c-1 0-1.8-.4-2.5-1s-1.1-1.6-1.1-2.6.3-1.8 1-2.5 1.6-1 2.6-1 1.8.3 2.5 1a3.4 3.4 0 0 1 .6 4.3 3.7 3.7 0 0 1-3 1.8zm23.2-33.5h6v23.3c0 2.1-.4 4-1.3 5.5a9.1 9.1 0 0 1-3.8 3.5c-1.6.8-3.5 1.3-5.7 1.3-2 0-3.7-.4-5.3-1s-2.8-1.8-3.7-3.2c-.9-1.3-1.4-3-1.4-5h6c.1.8.3 1.6.7 2.2s1 1.2 1.6 1.5c.7.4 1.5.5 2.4.5 1 0 1.8-.2 2.4-.6a4 4 0 0 0 1.6-1.8c.3-.8.5-1.8.5-3V45.5zm30.9 9.1a4.4 4.4 0 0 0-2-3.3 7.5 7.5 0 0 0-4.3-1.1c-1.3 0-2.4.2-3.3.5-.9.4-1.6 1-2 1.6a3.5 3.5 0 0 0-.3 4c.3.5.7.9 1.3 1.2l1.8 1 2 .5 3.2.8c1.3.3 2.5.7 3.7 1.2a13 13 0 0 1 3.2 1.8 8.1 8.1 0 0 1 3 6.5c0 2-.5 3.7-1.5 5.1a10 10 0 0 1-4.4 3.5c-1.8.8-4.1 1.2-6.8 1.2-2.6 0-4.9-.4-6.8-1.2-2-.8-3.4-2-4.5-3.5a10 10 0 0 1-1.7-5.6h6a5 5 0 0 0 3.5 4.6c1 .4 2.2.6 3.4.6 1.3 0 2.5-.2 3.5-.6 1-.4 1.8-1 2.4-1.7a4 4 0 0 0 .8-2.4c0-.9-.2-1.6-.7-2.2a11 11 0 0 0-2.1-1.4l-3.2-1-3.8-1c-2.8-.7-5-1.7-6.6-3.2a7.2 7.2 0 0 1-2.4-5.7 8 8 0 0 1 1.7-5 10 10 0 0 1 4.3-3.5c2-.8 4-1.2 6.4-1.2 2.3 0 4.4.4 6.2 1.2 1.8.8 3.2 2 4.3 3.4 1 1.4 1.5 3 1.5 5h-5.8z"/></svg>
+
+================
+File: public/vercel.svg
+================
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1155 1000"><path d="m577.3 0 577.4 1000H0z" fill="#fff"/></svg>
+
+================
+File: public/window.svg
+================
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 2.5h13v10a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1zM0 1h16v11.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 0 12.5zm3.75 4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5M7 4.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0m1.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5" fill="#666"/></svg>
+
+================
+File: .gitignore
+================
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+================
+File: eslint.config.mjs
+================
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+import { FlatCompat } from "@eslint/eslintrc";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+});
+
+const eslintConfig = [...compat.extends("next/core-web-vitals")];
+
+export default eslintConfig;
+
+================
+File: jsconfig.json
+================
+{
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./*"]
+    }
+  }
+}
+
+================
+File: next.config.mjs
+================
+/** @type {import('next').NextConfig} */
+const nextConfig = {};
+
+export default nextConfig;
+
+================
+File: package.json
+================
+{
+  "name": "friendship-ended-nextjs",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "next": "15.2.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "tailwindcss": "^4",
+    "eslint": "^9",
+    "eslint-config-next": "15.2.2",
+    "@eslint/eslintrc": "^3"
+  }
+}
+
+================
+File: postcss.config.mjs
+================
+const config = {
+  plugins: ["@tailwindcss/postcss"],
+};
+
+export default config;
+
+================
+File: README.md
+================
+# Friendship Ended Generator
+
+A Next.js port of the PHP-based "Friendship Ended" meme generator inspired by the Asif and Mudasir friendship saga.
+
+## Features
+
+- Upload photos of your new friend and old friend
+- Generate a classic "Friendship Ended" meme
+- Works entirely in the browser - no server dependencies
+- Modern UI with Tailwind CSS
+
+## Tech Stack
+
+- Next.js
+- React
+- Canvas API for image processing
+- Tailwind CSS for styling
+
+## Getting Started
+
+1. Clone this repository
+2. Install dependencies:
+   ```bash
+   npm install
+
+
+
+================================================================
+End of Codebase
+================================================================
